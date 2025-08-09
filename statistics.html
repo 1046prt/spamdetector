@@ -1,853 +1,988 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta theme-color="#6c5ce7">
-    <meta name="description" content="Statistical insights and performance metrics of our spam detection model">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta theme-color="#6c5ce7" />
+    <meta
+      name="description"
+      content="Statistical insights and performance metrics of our spam detection model"
+    />
     <title>Spam Shield - Statistics & Analytics</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
-        :root {
-            --primary-color: #6c5ce7;
-            --primary-light: #8a7eef;
-            --primary-dark: #5046c0;
-            --secondary-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --dark-bg: #121212;
-            --dark-surface: #1e1e1e;
-            --dark-card: #252525;
-            --dark-border: #333333;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --chart-ham-color: #2ecc71;
-            --chart-spam-color: #e74c3c;
-            --chart-grid-color: #333333;
-        }
+      :root {
+        --primary-color: #6c5ce7;
+        --primary-light: #8a7eef;
+        --primary-dark: #5046c0;
+        --secondary-color: #2ecc71;
+        --danger-color: #e74c3c;
+        --dark-bg: #121212;
+        --dark-surface: #1e1e1e;
+        --dark-card: #252525;
+        --dark-border: #333333;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --chart-ham-color: #2ecc71;
+        --chart-spam-color: #e74c3c;
+        --chart-grid-color: #333333;
+      }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: var(--font-family);
-            transition: all 0.3s ease;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: var(--font-family);
+        transition: all 0.3s ease;
+      }
 
-        body {
-            background-color: var(--dark-bg);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(108, 92, 231, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(108, 92, 231, 0.1) 0%, transparent 20%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            color: var(--text-primary);
-        }
+      body {
+        background-color: var(--dark-bg);
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(108, 92, 231, 0.1) 0%,
+            transparent 20%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(108, 92, 231, 0.1) 0%,
+            transparent 20%
+          );
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        color: var(--text-primary);
+      }
 
+      .navbar {
+        background-color: var(--dark-surface);
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .navbar-brand {
+        font-size: 1.6rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-brand i {
+        margin-right: 10px;
+        color: var(--primary-color);
+        font-size: 1.8rem;
+      }
+
+      .navbar-links {
+        display: flex;
+      }
+
+      .navbar-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        margin-left: 20px;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+      }
+
+      .navbar-links a i {
+        margin-right: 5px;
+      }
+
+      .navbar-links a:hover {
+        color: var(--text-primary);
+        background-color: rgba(108, 92, 231, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .navbar-links a.active {
+        color: var(--text-primary);
+        background-color: rgba(108, 92, 231, 0.2);
+        font-weight: 600;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+        flex-grow: 1;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        animation: fadeIn 1s ease;
+      }
+
+      .header h1 {
+        color: var(--text-primary);
+        margin-bottom: 0.8rem;
+        font-size: 2.8rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        background: linear-gradient(90deg, var(--primary-color), #a29bfe);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .card {
+        background-color: var(--dark-card);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        border: 1px solid var(--dark-border);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), #a29bfe);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--dark-border);
+        padding-bottom: 1rem;
+      }
+
+      .card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+      }
+
+      .card-title i {
+        margin-right: 10px;
+        color: var(--primary-light);
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+      }
+
+      .metric-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin: 2rem 0;
+      }
+
+      .metric-card {
+        background-color: var(--dark-surface);
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s;
+        border: 1px solid var(--dark-border);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .metric-card::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background: linear-gradient(90deg, var(--primary-color), transparent);
+      }
+
+      .metric-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+      }
+
+      .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        background: linear-gradient(45deg, var(--primary-light), #ffffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .metric-label {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      .info-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .process-card {
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 1.5rem;
+      }
+
+      .process-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        height: calc(100% - 8px);
+        width: 2px;
+        background: linear-gradient(
+          to bottom,
+          var(--primary-color),
+          transparent
+        );
+      }
+
+      .process-card:last-child::before {
+        display: none;
+      }
+
+      .process-card::after {
+        content: "";
+        position: absolute;
+        left: -4px;
+        top: 8px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        box-shadow: 0 0 10px var(--primary-color);
+      }
+
+      .process-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+      }
+
+      .process-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      .example-container {
+        background-color: var(--dark-surface);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .example-container pre {
+        color: var(--text-secondary);
+        font-family: monospace;
+        white-space: pre-wrap;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .example-header {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+      }
+
+      .example-result {
+        margin-top: 1rem;
+        font-weight: 600;
+        color: var(--danger-color);
+      }
+
+      .table-container {
+        overflow-x: auto;
+        margin: 1.5rem 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--dark-border);
+      }
+
+      th {
+        background-color: rgba(108, 92, 231, 0.1);
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      .footer {
+        background-color: var(--dark-surface);
+        color: var(--text-secondary);
+        text-align: center;
+        padding: 1.8rem;
+        margin-top: auto;
+        border-top: 1px solid var(--dark-border);
+      }
+
+      .footer a {
+        color: var(--primary-light);
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .footer a:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+
+      .tag.spam {
+        background-color: rgba(231, 76, 60, 0.15);
+        color: var(--danger-color);
+        border: 1px solid rgba(231, 76, 60, 0.3);
+      }
+
+      .tag.ham {
+        background-color: rgba(46, 204, 113, 0.15);
+        color: var(--secondary-color);
+        border: 1px solid rgba(46, 204, 113, 0.3);
+      }
+
+      .word-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 20px;
+        min-height: 200px;
+      }
+
+      .word-cloud span {
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+
+      .word-cloud span:hover {
+        transform: scale(1.1);
+      }
+
+      .confusion-matrix {
+        display: grid;
+        grid-template-columns: auto auto auto;
+        gap: 2px;
+        margin: 2rem auto;
+        max-width: 400px;
+      }
+
+      .matrix-header {
+        padding: 10px;
+        text-align: center;
+        font-weight: 600;
+        background-color: rgba(108, 92, 231, 0.1);
+        color: var(--text-primary);
+      }
+
+      .matrix-cell {
+        padding: 20px;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      .true-negative {
+        background-color: rgba(46, 204, 113, 0.2);
+        color: var(--secondary-color);
+      }
+
+      .false-positive {
+        background-color: rgba(231, 76, 60, 0.2);
+        color: var(--danger-color);
+      }
+
+      .false-negative {
+        background-color: rgba(241, 196, 15, 0.2);
+        color: #f1c40f;
+      }
+
+      .true-positive {
+        background-color: rgba(52, 152, 219, 0.2);
+        color: #3498db;
+      }
+
+      /* Animation keyframes */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Responsive styles */
+      @media (max-width: 768px) {
         .navbar {
-            background-color: var(--dark-surface);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+          flex-direction: column;
+          padding: 1rem;
         }
 
         .navbar-brand {
-            font-size: 1.6rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-brand i {
-            margin-right: 10px;
-            color: var(--primary-color);
-            font-size: 1.8rem;
-        }
-
-        .navbar-links {
-            display: flex;
-        }
-
-        .navbar-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            margin-left: 20px;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-links a i {
-            margin-right: 5px;
-        }
-
-        .navbar-links a:hover {
-            color: var(--text-primary);
-            background-color: rgba(108, 92, 231, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .navbar-links a.active {
-            color: var(--text-primary);
-            background-color: rgba(108, 92, 231, 0.2);
-            font-weight: 600;
-        }
-
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-            flex-grow: 1;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            animation: fadeIn 1s ease;
-        }
-
-        .header h1 {
-            color: var(--text-primary);
-            margin-bottom: 0.8rem;
-            font-size: 2.8rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(90deg, var(--primary-color), #a29bfe);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto;
+          margin-bottom: 1rem;
         }
 
         .card {
-            background-color: var(--dark-card);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-            border: 1px solid var(--dark-border);
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.8s ease;
+          padding: 1.5rem;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), #a29bfe);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--dark-border);
-            padding-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-        }
-
-        .card-title i {
-            margin-right: 10px;
-            color: var(--primary-light);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
+        .header h1 {
+          font-size: 2.2rem;
         }
 
         .metric-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 2rem 0;
-        }
-
-        .metric-card {
-            background-color: var(--dark-surface);
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s;
-            border: 1px solid var(--dark-border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .metric-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            width: 100%;
-            background: linear-gradient(90deg, var(--primary-color), transparent);
-        }
-
-        .metric-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
-
-        .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-            background: linear-gradient(45deg, var(--primary-light), #ffffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .metric-label {
-            color: var(--text-secondary);
-            font-size: 1rem;
+          grid-template-columns: 1fr;
         }
 
         .info-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+          grid-template-columns: 1fr;
         }
-
-        .process-card {
-            position: relative;
-            padding-left: 30px;
-            margin-bottom: 1.5rem;
-        }
-
-        .process-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 8px;
-            height: calc(100% - 8px);
-            width: 2px;
-            background: linear-gradient(to bottom, var(--primary-color), transparent);
-        }
-
-        .process-card:last-child::before {
-            display: none;
-        }
-
-        .process-card::after {
-            content: '';
-            position: absolute;
-            left: -4px;
-            top: 8px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            box-shadow: 0 0 10px var(--primary-color);
-        }
-
-        .process-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-
-        .process-desc {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .example-container {
-            background-color: var(--dark-surface);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .example-container pre {
-            color: var(--text-secondary);
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .example-header {
-            color: var(--text-primary);
-            font-weight: 600;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .example-result {
-            margin-top: 1rem;
-            font-weight: 600;
-            color: var(--danger-color);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin: 1.5rem 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--dark-border);
-        }
-
-        th {
-            background-color: rgba(108, 92, 231, 0.1);
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        tr:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .footer {
-            background-color: var(--dark-surface);
-            color: var(--text-secondary);
-            text-align: center;
-            padding: 1.8rem;
-            margin-top: auto;
-            border-top: 1px solid var(--dark-border);
-        }
-
-        .footer a {
-            color: var(--primary-light);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer a:hover {
-            color: var(--primary-color);
-            text-decoration: underline;
-        }
-
-        .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-
-        .tag.spam {
-            background-color: rgba(231, 76, 60, 0.15);
-            color: var(--danger-color);
-            border: 1px solid rgba(231, 76, 60, 0.3);
-        }
-
-        .tag.ham {
-            background-color: rgba(46, 204, 113, 0.15);
-            color: var(--secondary-color);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-        }
-
-        .word-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            padding: 20px;
-            min-height: 200px;
-        }
-
-        .word-cloud span {
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .word-cloud span:hover {
-            transform: scale(1.1);
-        }
-
-        .confusion-matrix {
-            display: grid;
-            grid-template-columns: auto auto auto;
-            gap: 2px;
-            margin: 2rem auto;
-            max-width: 400px;
-        }
-
-        .matrix-header {
-            padding: 10px;
-            text-align: center;
-            font-weight: 600;
-            background-color: rgba(108, 92, 231, 0.1);
-            color: var(--text-primary);
-        }
-
-        .matrix-cell {
-            padding: 20px;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .true-negative {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: var(--secondary-color);
-        }
-
-        .false-positive {
-            background-color: rgba(231, 76, 60, 0.2);
-            color: var(--danger-color);
-        }
-
-        .false-negative {
-            background-color: rgba(241, 196, 15, 0.2);
-            color: #f1c40f;
-        }
-
-        .true-positive {
-            background-color: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-        }
-
-        /* Animation keyframes */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                padding: 1rem;
-            }
-
-            .navbar-brand {
-                margin-bottom: 1rem;
-            }
-
-            .card {
-                padding: 1.5rem;
-            }
-
-            .header h1 {
-                font-size: 2.2rem;
-            }
-
-            .metric-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .info-section {
-                grid-template-columns: 1fr;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar">
-        <div class="navbar-brand">
-            <i class="fas fa-shield-alt"></i>
-            <span>Spam Shield</span>
-        </div>
-        <div class="navbar-links">
-            <a href="index.html"><i class="fas fa-home"></i> Home</a>
-            <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
-            <a href="statistics.html" class="active"><i class="fas fa-chart-bar"></i> Statistics</a>
-            </div>
+      <div class="navbar-brand">
+        <i class="fas fa-shield-alt"></i>
+        <span>Spam Shield</span>
+      </div>
+      <div class="navbar-links">
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="about.html"><i class="fas fa-info-circle"></i> About</a>
+        <a href="statistics.html" class="active"
+          ><i class="fas fa-chart-bar"></i> Statistics</a
+        >
+      </div>
     </nav>
 
     <div class="container">
-        <div class="header">
-            <h1>Model Statistics & Performance</h1>
-            <p>Detailed analysis of our spam detection model's performance, dataset insights, and feature importance.</p>
-        </div>
+      <div class="header">
+        <h1>Model Statistics & Performance</h1>
+        <p>
+          Detailed analysis of our spam detection model's performance, dataset
+          insights, and feature importance.
+        </p>
+      </div>
 
-        <div class="metric-cards">
-            <div class="metric-card">
-                <div class="metric-icon">
-                    <i class="fas fa-bullseye"></i>
-                </div>
-                <div class="metric-value">97.6%</div>
-                <div class="metric-label">Precision</div>
-                <p class="process-desc">97.6% of messages predicted as spam were actually spam</p>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon">
-                    <i class="fas fa-search"></i>
-                </div>
-                <div class="metric-value">89.8%</div>
-                <div class="metric-label">Recall</div>
-                <p class="process-desc">89.8% of all spam messages were correctly detected</p>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon">
-                    <i class="fas fa-balance-scale"></i>
-                </div>
-                <div class="metric-value">93.5%</div>
-                <div class="metric-label">F1-Score</div>
-                <p class="process-desc">Harmonic mean of precision and recall</p>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="metric-value">~5,500</div>
-                <div class="metric-label">Dataset Size</div>
-                <p class="process-desc">Number of labeled SMS messages analyzed</p>
-            </div>
+      <div class="metric-cards">
+        <div class="metric-card">
+          <div class="metric-icon">
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <div class="metric-value">97.6%</div>
+          <div class="metric-label">Precision</div>
+          <p class="process-desc">
+            97.6% of messages predicted as spam were actually spam
+          </p>
         </div>
+        <div class="metric-card">
+          <div class="metric-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="metric-value">89.8%</div>
+          <div class="metric-label">Recall</div>
+          <p class="process-desc">
+            89.8% of all spam messages were correctly detected
+          </p>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <div class="metric-value">93.5%</div>
+          <div class="metric-label">F1-Score</div>
+          <p class="process-desc">Harmonic mean of precision and recall</p>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="metric-value">~5,500</div>
+          <div class="metric-label">Dataset Size</div>
+          <p class="process-desc">Number of labeled SMS messages analyzed</p>
+        </div>
+      </div>
 
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="fas fa-chart-pie"></i> Dataset Composition
-                </div>
-            </div>
-            <div class="chart-container">
-                <canvas id="datasetChart"></canvas>
-            </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-chart-pie"></i> Dataset Composition
+          </div>
         </div>
+        <div class="chart-container">
+          <canvas id="datasetChart"></canvas>
+        </div>
+      </div>
 
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="fas fa-chart-line"></i> Performance Metrics
-                </div>
-            </div>
-            <div class="chart-container">
-                <canvas id="metricsChart"></canvas>
-            </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-chart-line"></i> Performance Metrics
+          </div>
         </div>
+        <div class="chart-container">
+          <canvas id="metricsChart"></canvas>
+        </div>
+      </div>
 
-        <div class="info-section">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="fas fa-code-branch"></i> Processing Pipeline
-                    </div>
-                </div>
-                
-                <div class="process-card">
-                    <div class="process-title">Data Collection</div>
-                    <div class="process-desc">Collection of ~5,500 labeled SMS messages (ham or spam) from spam.csv dataset.</div>
-                </div>
-                
-                <div class="process-card">
-                    <div class="process-title">Preprocessing</div>
-                    <div class="process-desc">Removed null values and unnecessary columns. Converted text to lowercase, removed punctuation and English stopwords using NLTK. Tokenized and cleaned using regex.</div>
-                </div>
-                
-                <div class="process-card">
-                    <div class="process-title">Feature Extraction</div>
-                    <div class="process-desc">Used TF-IDF Vectorizer to convert text into numerical features, capturing importance of words in individual messages and across the dataset.</div>
-                </div>
-                
-                <div class="process-card">
-                    <div class="process-title">Label Encoding</div>
-                    <div class="process-desc">Encoded labels using Label Encoder (ham = 0, spam = 1).</div>
-                </div>
-                
-                <div class="process-card">
-                    <div class="process-title">Train-Test Split</div>
-                    <div class="process-desc">Split data into 80% training and 20% testing to ensure model generalization and unbiased evaluation.</div>
-                </div>
-                
-                <div class="process-card">
-                    <div class="process-title">Model Training</div>
-                    <div class="process-desc">Used Random Forest Classifier chosen for its high accuracy, ability to handle large feature sets, and resistance to overfitting.</div>
-                </div>
-                
-                <div class="process-card">
-                    <div class="process-title">Evaluation</div>
-                    <div class="process-desc">Evaluated using precision, recall, and F1-score to assess performance with focus on minimizing false positives and false negatives.</div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="fas fa-robot"></i> Model Details
-                    </div>
-                </div>
-                
-                <div class="process-desc" style="margin-bottom: 1.5rem;">
-                    <p>Our spam detection system uses a Random Forest Classifier with TF-IDF feature extraction to identify unwanted messages.</p>
-                </div>
-                
-                <div class="process-title">Why Random Forest?</div>
-                <div class="process-desc" style="margin-bottom: 1.5rem;">
-                    <ul style="list-style-type: none; padding-left: 15px; margin: 1rem 0;">
-                        <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--primary-color); margin-right: 8px;"></i> High accuracy on diverse data</li>
-                        <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--primary-color); margin-right: 8px;"></i> Handles large feature sets efficiently</li>
-                        <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--primary-color); margin-right: 8px;"></i> Resistant to overfitting</li>
-                        <li style="margin-bottom: 0.5rem;"><i class="fas fa-check" style="color: var(--primary-color); margin-right: 8px;"></i> Provides feature importance metrics</li>
-                        <li><i class="fas fa-check" style="color: var(--primary-color); margin-right: 8px;"></i> Works well with TF-IDF vectorized text</li>
-                    </ul>
-                </div>
-                
-                <div class="process-title">Confusion Matrix</div>
-                <div class="confusion-matrix">
-                    <div class="matrix-header"></div>
-                    <div class="matrix-header">Predicted HAM</div>
-                    <div class="matrix-header">Predicted SPAM</div>
-                    <div class="matrix-header">Actual HAM</div>
-                    <div class="matrix-cell true-negative">TN: 982</div>
-                    <div class="matrix-cell false-positive">FP: 8</div>
-                    <div class="matrix-header">Actual SPAM</div>
-                    <div class="matrix-cell false-negative">FN: 16</div>
-                    <div class="matrix-cell true-positive">TP: 144</div>
-                </div>
-                
-                <div class="example-container">
-                    <div class="example-header">Test Case Example</div>
-                    <pre>Input: "Congratulations! You've won a $1000 Walmart gift card. Click here to claim now."</pre>
-                    <div class="example-result">Prediction: SPAM (Confidence: 96.8%)</div>
-                </div>
-            </div>
-        </div>
-        
+      <div class="info-section">
         <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="fas fa-key"></i> Feature Importance
-                </div>
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fas fa-code-branch"></i> Processing Pipeline
             </div>
-            
-            <div class="process-desc" style="margin-bottom: 1.5rem;">
-                Our model identifies specific keywords and patterns that are strongly associated with spam messages.
-            </div>
-            
-            <div class="word-cloud" id="spamWordCloud">
-                <!-- Dynamically generated with JavaScript -->
-            </div>
-            
-            <div style="text-align: center; margin: 1.5rem 0;">
-                <div class="tag spam">Spam Keywords</div>
-                <div class="tag ham">Ham Keywords</div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="fas fa-lightbulb"></i> Insights & Interpretations
-                </div>
-            </div>
-            
+          </div>
+
+          <div class="process-card">
+            <div class="process-title">Data Collection</div>
             <div class="process-desc">
-                <p style="margin-bottom: 1rem;">Based on our analysis of the model performance and dataset characteristics:</p>
-                
-                <ul style="list-style-type: none; padding-left: 15px; margin: 1rem 0;">
-                    <li style="margin-bottom: 1rem;"><i class="fas fa-angle-right" style="color: var(--primary-color); margin-right: 8px;"></i> <strong>High Precision (97.6%):</strong> The model excels at avoiding false positives, meaning legitimate messages are rarely flagged as spam.</li>
-                    <li style="margin-bottom: 1rem;"><i class="fas fa-angle-right" style="color: var(--primary-color); margin-right: 8px;"></i> <strong>Good Recall (89.8%):</strong> The model catches most spam messages, though some still slip through.</li>
-                    <li style="margin-bottom: 1rem;"><i class="fas fa-angle-right" style="color: var(--primary-color); margin-right: 8px;"></i> <strong>Strong F1-Score (93.5%):</strong> Indicates well-balanced performance between precision and recall.</li>
-                    <li style="margin-bottom: 1rem;"><i class="fas fa-angle-right" style="color: var(--primary-color); margin-right: 8px;"></i> <strong>TF-IDF Effectiveness:</strong> Successfully highlights spam-indicative keywords, improving classification quality.</li>
-                    <li><i class="fas fa-angle-right" style="color: var(--primary-color); margin-right: 8px;"></i> <strong>Dataset Imbalance:</strong> The dataset contains more ham than spam messages, which is expected in real-world scenarios.</li>
-                </ul>
+              Collection of ~5,500 labeled SMS messages (ham or spam) from
+              spam.csv dataset.
             </div>
+          </div>
+
+          <div class="process-card">
+            <div class="process-title">Preprocessing</div>
+            <div class="process-desc">
+              Removed null values and unnecessary columns. Converted text to
+              lowercase, removed punctuation and English stopwords using NLTK.
+              Tokenized and cleaned using regex.
+            </div>
+          </div>
+
+          <div class="process-card">
+            <div class="process-title">Feature Extraction</div>
+            <div class="process-desc">
+              Used TF-IDF Vectorizer to convert text into numerical features,
+              capturing importance of words in individual messages and across
+              the dataset.
+            </div>
+          </div>
+
+          <div class="process-card">
+            <div class="process-title">Label Encoding</div>
+            <div class="process-desc">
+              Encoded labels using Label Encoder (ham = 0, spam = 1).
+            </div>
+          </div>
+
+          <div class="process-card">
+            <div class="process-title">Train-Test Split</div>
+            <div class="process-desc">
+              Split data into 80% training and 20% testing to ensure model
+              generalization and unbiased evaluation.
+            </div>
+          </div>
+
+          <div class="process-card">
+            <div class="process-title">Model Training</div>
+            <div class="process-desc">
+              Used Random Forest Classifier chosen for its high accuracy,
+              ability to handle large feature sets, and resistance to
+              overfitting.
+            </div>
+          </div>
+
+          <div class="process-card">
+            <div class="process-title">Evaluation</div>
+            <div class="process-desc">
+              Evaluated using precision, recall, and F1-score to assess
+              performance with focus on minimizing false positives and false
+              negatives.
+            </div>
+          </div>
         </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <i class="fas fa-robot"></i> Model Details
+            </div>
+          </div>
+
+          <div class="process-desc" style="margin-bottom: 1.5rem">
+            <p>
+              Our spam detection system uses a Random Forest Classifier with
+              TF-IDF feature extraction to identify unwanted messages.
+            </p>
+          </div>
+
+          <div class="process-title">Why Random Forest?</div>
+          <div class="process-desc" style="margin-bottom: 1.5rem">
+            <ul
+              style="list-style-type: none; padding-left: 15px; margin: 1rem 0"
+            >
+              <li style="margin-bottom: 0.5rem">
+                <i
+                  class="fas fa-check"
+                  style="color: var(--primary-color); margin-right: 8px"
+                ></i>
+                High accuracy on diverse data
+              </li>
+              <li style="margin-bottom: 0.5rem">
+                <i
+                  class="fas fa-check"
+                  style="color: var(--primary-color); margin-right: 8px"
+                ></i>
+                Handles large feature sets efficiently
+              </li>
+              <li style="margin-bottom: 0.5rem">
+                <i
+                  class="fas fa-check"
+                  style="color: var(--primary-color); margin-right: 8px"
+                ></i>
+                Resistant to overfitting
+              </li>
+              <li style="margin-bottom: 0.5rem">
+                <i
+                  class="fas fa-check"
+                  style="color: var(--primary-color); margin-right: 8px"
+                ></i>
+                Provides feature importance metrics
+              </li>
+              <li>
+                <i
+                  class="fas fa-check"
+                  style="color: var(--primary-color); margin-right: 8px"
+                ></i>
+                Works well with TF-IDF vectorized text
+              </li>
+            </ul>
+          </div>
+
+          <div class="process-title">Confusion Matrix</div>
+          <div class="confusion-matrix">
+            <div class="matrix-header"></div>
+            <div class="matrix-header">Predicted HAM</div>
+            <div class="matrix-header">Predicted SPAM</div>
+            <div class="matrix-header">Actual HAM</div>
+            <div class="matrix-cell true-negative">TN: 982</div>
+            <div class="matrix-cell false-positive">FP: 8</div>
+            <div class="matrix-header">Actual SPAM</div>
+            <div class="matrix-cell false-negative">FN: 16</div>
+            <div class="matrix-cell true-positive">TP: 144</div>
+          </div>
+
+          <div class="example-container">
+            <div class="example-header">Test Case Example</div>
+            <pre>
+Input: "Congratulations! You've won a $1000 Walmart gift card. Click here to claim now."</pre
+            >
+            <div class="example-result">
+              Prediction: SPAM (Confidence: 96.8%)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-key"></i> Feature Importance
+          </div>
+        </div>
+
+        <div class="process-desc" style="margin-bottom: 1.5rem">
+          Our model identifies specific keywords and patterns that are strongly
+          associated with spam messages.
+        </div>
+
+        <div class="word-cloud" id="spamWordCloud">
+          <!-- Dynamically generated with JavaScript -->
+        </div>
+
+        <div style="text-align: center; margin: 1.5rem 0">
+          <div class="tag spam">Spam Keywords</div>
+          <div class="tag ham">Ham Keywords</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-lightbulb"></i> Insights & Interpretations
+          </div>
+        </div>
+
+        <div class="process-desc">
+          <p style="margin-bottom: 1rem">
+            Based on our analysis of the model performance and dataset
+            characteristics:
+          </p>
+
+          <ul style="list-style-type: none; padding-left: 15px; margin: 1rem 0">
+            <li style="margin-bottom: 1rem">
+              <i
+                class="fas fa-angle-right"
+                style="color: var(--primary-color); margin-right: 8px"
+              ></i>
+              <strong>High Precision (97.6%):</strong> The model excels at
+              avoiding false positives, meaning legitimate messages are rarely
+              flagged as spam.
+            </li>
+            <li style="margin-bottom: 1rem">
+              <i
+                class="fas fa-angle-right"
+                style="color: var(--primary-color); margin-right: 8px"
+              ></i>
+              <strong>Good Recall (89.8%):</strong> The model catches most spam
+              messages, though some still slip through.
+            </li>
+            <li style="margin-bottom: 1rem">
+              <i
+                class="fas fa-angle-right"
+                style="color: var(--primary-color); margin-right: 8px"
+              ></i>
+              <strong>Strong F1-Score (93.5%):</strong> Indicates well-balanced
+              performance between precision and recall.
+            </li>
+            <li style="margin-bottom: 1rem">
+              <i
+                class="fas fa-angle-right"
+                style="color: var(--primary-color); margin-right: 8px"
+              ></i>
+              <strong>TF-IDF Effectiveness:</strong> Successfully highlights
+              spam-indicative keywords, improving classification quality.
+            </li>
+            <li>
+              <i
+                class="fas fa-angle-right"
+                style="color: var(--primary-color); margin-right: 8px"
+              ></i>
+              <strong>Dataset Imbalance:</strong> The dataset contains more ham
+              than spam messages, which is expected in real-world scenarios.
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <footer class="footer">
-        <p> &copy; 2025 Spam Shield - Advanced Protection System </footer>
+      <p>&copy; 2025 Spam Shield - Advanced Protection System</p>
+    </footer>
 
     <script>
-        // Dataset composition chart
-        const datasetCtx = document.getElementById('datasetChart').getContext('2d');
-        const datasetChart = new Chart(datasetCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Ham Messages (4,825)', 'Spam Messages (675)'],
-                datasets: [{
-                    data: [4825, 675],
-                    backgroundColor: [
-                        '#2ecc71',
-                        '#e74c3c'
-                    ],
-                    borderColor: [
-                        '#27ae60',
-                        '#c0392b'
-                    ],
-                    borderWidth: 1
-                }]
+      // Dataset composition chart
+      const datasetCtx = document
+        .getElementById("datasetChart")
+        .getContext("2d");
+      const datasetChart = new Chart(datasetCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Ham Messages (4,825)", "Spam Messages (675)"],
+          datasets: [
+            {
+              data: [4825, 675],
+              backgroundColor: ["#2ecc71", "#e74c3c"],
+              borderColor: ["#27ae60", "#c0392b"],
+              borderWidth: 1,
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            color: '#ecf0f1',
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw;
-                                const total = context.dataset.data.reduce((acc, data) => acc + data, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${percentage}% (${value} messages)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // Performance metrics chart
-        const metricsCtx = document.getElementById('metricsChart').getContext('2d');
-        const metricsChart = new Chart(metricsCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Precision', 'Recall', 'F1-Score', 'Accuracy'],
-                datasets: [{
-                    label: 'Performance Metrics',
-                    data: [0.976, 0.898, 0.935, 0.954],
-                    backgroundColor: [
-                        'rgba(108, 92, 231, 0.7)',
-                        'rgba(108, 92, 231, 0.7)',
-                        'rgba(108, 92, 231, 0.7)',
-                        'rgba(108, 92, 231, 0.7)'
-                    ],
-                    borderColor: [
-                        '#6c5ce7',
-                        '#6c5ce7',
-                        '#6c5ce7',
-                        '#6c5ce7'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 1,
-                        ticks: {
-                            color: '#b0b0b0',
-                            callback: function(value) {
-                                return (value * 100).toFixed(0) + '%';
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            color: '#b0b0b0'
-                        },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
-                    }
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                color: "#ecf0f1",
+                font: {
+                  size: 14,
                 },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${(context.raw * 100).toFixed(1)}%`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const label = context.label || "";
+                  const value = context.raw;
+                  const total = context.dataset.data.reduce(
+                    (acc, data) => acc + data,
+                    0
+                  );
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${percentage}% (${value} messages)`;
+                },
+              },
+            },
+          },
+        },
+      });
 
-        // Dynamically generate word cloud
-        const spamWords = [
-            { text: 'free', size: 36, type: 'spam' },
-            { text: 'win', size: 32, type: 'spam' },
-            { text: 'cash', size: 30, type: 'spam' },
-            { text: 'prize', size:28, type: 'spam' },
-            { text: 'click', size: 26, type: 'spam' },
-            { text: 'offer', size: 24, type: 'spam' },
-            { text: 'urgent', size: 22, type: 'spam' },
-            { text: 'claim', size: 20, type: 'spam' },
-            { text: 'limited', size: 18, type: 'spam' },
-            { text: 'winner', size: 16, type: 'spam' },
-            { text: 'money', size: 14, type: 'spam' },
-            { text: 'hello', size: 12, type: 'ham' },
-            { text: 'meeting', size: 10, type: 'ham' },
-            { text: 'project', size: 8, type: 'ham' },
-            { text: 'schedule', size: 6, type: 'ham' },
-            { text: 'thank', size: 4, type: 'ham' },
-            { text: 'please', size: 2, type: 'ham' }
-        ];
+      // Performance metrics chart
+      const metricsCtx = document
+        .getElementById("metricsChart")
+        .getContext("2d");
+      const metricsChart = new Chart(metricsCtx, {
+        type: "bar",
+        data: {
+          labels: ["Precision", "Recall", "F1-Score", "Accuracy"],
+          datasets: [
+            {
+              label: "Performance Metrics",
+              data: [0.976, 0.898, 0.935, 0.954],
+              backgroundColor: [
+                "rgba(108, 92, 231, 0.7)",
+                "rgba(108, 92, 231, 0.7)",
+                "rgba(108, 92, 231, 0.7)",
+                "rgba(108, 92, 231, 0.7)",
+              ],
+              borderColor: ["#6c5ce7", "#6c5ce7", "#6c5ce7", "#6c5ce7"],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 1,
+              ticks: {
+                color: "#b0b0b0",
+                callback: function (value) {
+                  return (value * 100).toFixed(0) + "%";
+                },
+              },
+              grid: {
+                color: "rgba(255, 255, 255, 0.1)",
+              },
+            },
+            x: {
+              ticks: {
+                color: "#b0b0b0",
+              },
+              grid: {
+                color: "rgba(255, 255, 255, 0.1)",
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return `${(context.raw * 100).toFixed(1)}%`;
+                },
+              },
+            },
+          },
+        },
+      });
 
-        const wordCloudContainer = document.getElementById('spamWordCloud');
-        spamWords.forEach(word => {
-            const span = document.createElement('span');
-            span.textContent = word.text;
-            span.style.fontSize = `${word.size}px`;
-            span.classList.add(word.type);
-            wordCloudContainer.appendChild(span);
-        });
+      // Dynamically generate word cloud
+      const spamWords = [
+        { text: "free", size: 36, type: "spam" },
+        { text: "win", size: 32, type: "spam" },
+        { text: "cash", size: 30, type: "spam" },
+        { text: "prize", size: 28, type: "spam" },
+        { text: "click", size: 26, type: "spam" },
+        { text: "offer", size: 24, type: "spam" },
+        { text: "urgent", size: 22, type: "spam" },
+        { text: "claim", size: 20, type: "spam" },
+        { text: "limited", size: 18, type: "spam" },
+        { text: "winner", size: 16, type: "spam" },
+        { text: "money", size: 14, type: "spam" },
+        { text: "hello", size: 12, type: "ham" },
+        { text: "meeting", size: 10, type: "ham" },
+        { text: "project", size: 8, type: "ham" },
+        { text: "schedule", size: 6, type: "ham" },
+        { text: "thank", size: 4, type: "ham" },
+        { text: "please", size: 2, type: "ham" },
+      ];
+
+      const wordCloudContainer = document.getElementById("spamWordCloud");
+      spamWords.forEach((word) => {
+        const span = document.createElement("span");
+        span.textContent = word.text;
+        span.style.fontSize = `${word.size}px`;
+        span.classList.add(word.type);
+        wordCloudContainer.appendChild(span);
+      });
     </script>
-</body>
+  </body>
 </html>
